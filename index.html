@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>世界遺産検定対策アプリ</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background: #f9f9f9; }
+        .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #333; margin-top: 0; }
+        .tag { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <h1>世界遺産検定対策アプリへようこそ</h1>
+    <p style="color: green; font-weight: bold;">{{ db_status }}</p>
+    <p>登録件数: {{ heritages | length }} 件</p>
+
+    {% for h in heritages %}
+    <div class="card">
+        <h2>{{ h.heritage_name }} <span style="font-size: 14px; color: #666;">({{ h.chapter }})</span></h2>
+        <div>
+            <span class="tag">国: {{ h.tag_country }}</span>
+            <span class="tag">種別: {{ h.tag_type }}</span>
+            {% if h.tag_special %}<span class="tag" style="background: #fee2e2; color: #991b1b;">{{ h.tag_special }}</span>{% endif %}
+            <span class="tag">系統: {{ h.tag_others }}</span>
+            <span class="tag">基準: {{ h.tag_criterion }}</span>
+        </div>
+        <ul>
+            <li>{{ h.feature_1 }}</li>
+            <li>{{ h.feature_2 }}</li>
+            <li>{{ h.feature_3 }}</li>
+        </ul>
+    </div>
+    {% endfor %}
+</body>
+</html>
