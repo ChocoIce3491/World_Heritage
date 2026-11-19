@@ -32,8 +32,15 @@
         .result-box.correct-result { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
         .result-box.incorrect-result { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
         .result-box h3 { margin: 0 0 8px 0; font-size: 20px; }
+
+        /* 結果ボックス内のタグ・情報エリア */
+        .result-meta { margin-top: 14px; padding-top: 14px; border-top: 1px dashed rgba(0, 0, 0, 0.12); text-align: left; font-size: 14px; color: #1e293b; }
+        .meta-row { margin-bottom: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+        .meta-label { font-weight: bold; color: #475569; min-width: 84px; }
+        .tag-chip { display: inline-block; background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(0, 0, 0, 0.12); padding: 2px 10px; border-radius: 14px; font-size: 12px; font-weight: 600; color: #0f172a; }
+        .tag-chip.category-chip { background: #e0e7ff; border-color: #c7d2fe; color: #3730a3; }
         
-        .btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+        .btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
         .next-btn { display: inline-block; background: #2563eb; color: white; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: background 0.2s; }
         .next-btn:hover { background: #1d4ed8; }
         .reset-score-btn { background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
@@ -57,7 +64,7 @@
             <button class="reset-score-btn" onclick="resetScore()">スコアをリセット</button>
         </div>
 
-        <span class="tag-badge">系統: {{ correct_item.tag_others }}</span>
+        <span class="tag-badge">系統: {{ correct_item.tag_others or '未設定' }}</span>
         <h1>この世界遺産はどれでしょう？</h1>
 
         <div class="hint-box">
@@ -72,7 +79,6 @@
         <h3>選択肢から選んでください：</h3>
         <div class="choices-container" id="choices-group">
             {% for c in choices %}
-                <!-- data-* 属性を使って安全にデータを渡す -->
                 <button class="choice-btn" data-choice="{{ c }}" data-correct="{{ correct_item.heritage_name }}" onclick="checkAnswer(this)">{{ c }}</button>
             {% endfor %}
         </div>
@@ -80,6 +86,41 @@
         <div id="result-box" class="result-box">
             <h3 id="result-title"></h3>
             <p>正解は <b>{{ correct_item.heritage_name }}</b> でした！</p>
+
+            <!-- tag_others 以外のタグ・補足情報を表示 -->
+            <div class="result-meta">
+                <div class="meta-row">
+                    <span class="meta-label">その他タグ:</span>
+                    {% if correct_item.tag_category %}
+                        {% for t in correct_item.tag_category.split(',') %}
+                            {% if t.strip() %}
+                                <span class="tag-chip category-chip">{{ t.strip() }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <span class="tag-chip">なし</span>
+                    {% endif %}
+                </div>
+                {% if correct_item.heritage_type %}
+                <div class="meta-row">
+                    <span class="meta-label">遺産種別:</span>
+                    <span class="tag-chip">{{ correct_item.heritage_type }}</span>
+                </div>
+                {% endif %}
+                {% if correct_item.country %}
+                <div class="meta-row">
+                    <span class="meta-label">国・地域:</span>
+                    <span class="tag-chip">{{ correct_item.country }}</span>
+                </div>
+                {% endif %}
+                {% if correct_item.criteria %}
+                <div class="meta-row">
+                    <span class="meta-label">登録基準:</span>
+                    <span class="tag-chip">{{ correct_item.criteria }}</span>
+                </div>
+                {% endif %}
+            </div>
+
             <div class="btn-group">
                 <a href="/quiz" class="next-btn">次の問題へ進む ➔</a>
             </div>
@@ -112,11 +153,9 @@
         }
 
         function checkAnswer(buttonElement) {
-            // data-* 属性から安全に値を取得
             const selectedChoice = buttonElement.getAttribute('data-choice');
             const correctAnswer = buttonElement.getAttribute('data-correct');
 
-            // すべてのボタンを無効化（二重押し防止）
             const buttons = document.querySelectorAll('.choice-btn');
             buttons.forEach(btn => btn.disabled = true);
 
